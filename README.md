@@ -1,6 +1,8 @@
 ## go-insert-translated-name
 `go-insert-translated-name` is a Go language version of the [insert-translated-name](https://github.com/manateelazycat/insert-translated-name) implementation that combines [DeepLX](https://github.com/OwO-Network/DeepLX) and [deno-bridge-ts](https://github.com/manateelazycat/deno-bridge-ts) for smaller memory footprint and faster translation.
 
+![demo](./demo.gif)
+
 ### Usage
 1. Clone
 ```

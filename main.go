@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
@@ -117,11 +118,11 @@ func getTimeStamp(iCount int64) int64 {
 	}
 }
 
-func translate(content string) (string, error) {
+func translate(content string, lang string) (string, error) {
 	// create a random id
 	id := getRandomNumber()
 
-	reqj := ResData{TransText: content}
+	reqj := ResData{TransText: content, TargetLang: lang}
 	sourceLang := reqj.SourceLang
 	targetLang := reqj.TargetLang
 	translateText := reqj.TransText
@@ -200,6 +201,13 @@ func translate(content string) (string, error) {
 	return res.Get("result.texts.0.text").String(), nil
 }
 
+func truncateText(s string, max int) string {
+    if max > len(s) {
+	return s
+    }
+    return s[:strings.LastIndex(s[:max]," ")] + "..."
+}
+
 func handleMessage(message string) {
 	fmt.Println("Receviced message:", message)
 	var dataArray []interface{}
@@ -210,14 +218,23 @@ func handleMessage(message string) {
 	style := dataArray[1].([]interface{})[1].(string)
 	buffername := dataArray[1].([]interface{})[2].(string)
 	placeholder := dataArray[1].([]interface{})[3].(string)
-	goBridge.MessageToEmacs("Begin to transalte: " + content)
-	translation, err := translate(content)
-	emacsCmd := "(insert-translated-name-update-translation-in-buffer \"" + content + "\" \"" + style + "\" \"" + translation + "\" \"" + buffername + "\" \"" + placeholder + "\")"
+	lang := "EN"
+	if pArry, ok := dataArray[1].([]interface{}); ok && len(pArry) > 5 {
+		if langStr, ok := pArry[5].(string); ok {
+			lang = langStr
+		}
+	}
 
+	goBridge.MessageToEmacs("Begin to transalte: " + truncateText(content, 30) + " To " + lang)
+	translation, err := translate(content, lang)
 	if err != nil {
 		fmt.Println(err)
 		goBridge.MessageToEmacs(err.Error())
 		return
+	}
+	emacsCmd := "(insert-translated-name-update-translation-in-buffer \"" + content + "\" \"" + style + "\" \"" + translation + "\" \"" + buffername + "\" \"" + placeholder + "\")"
+	if lang == "ZH" {
+		emacsCmd = "(insert-translated-name-show-translation-posframe " + strconv.Quote(translation) + ")"
 	}
 	fmt.Println(emacsCmd)
 	goBridge.EvalInEmacs(emacsCmd)

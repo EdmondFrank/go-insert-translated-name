@@ -205,7 +205,11 @@ func truncateText(s string, max int) string {
     if max > len(s) {
 	return s
     }
-    return s[:strings.LastIndex(s[:max]," ")] + "..."
+    r := []rune(s)
+    if len(r) <= max {
+	return s
+    }
+    return string(r[:max]) + "..."
 }
 
 func handleMessage(message string) {

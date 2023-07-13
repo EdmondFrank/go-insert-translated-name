@@ -42,6 +42,8 @@ Go bridge connected!
 ### Dependencies
 This project depends on the following packages:
 
+### Changelog
+  * [X] 2023-07-13: Update Request UserAgent
 
 ### License
 This project is licensed under the MIT License. See the LICENSE file for more information.
